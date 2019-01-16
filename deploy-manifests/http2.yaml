@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: http2-hello
+spec:
+  template:
+    metadata:
+      labels:
+        app: http2-hello
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: gcr.io/hipster-apim-demo/http2-hello
+        ports:
+        - containerPort: 8080        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http2-hello
+spec:
+  type: ClusterIP
+  selector:
+    app: http2-hello
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http2

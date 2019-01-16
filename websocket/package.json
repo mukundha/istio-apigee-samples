@@ -1,0 +1,14 @@
+{
+  "name": "istio-websockets",
+  "version": "1.0.0",
+  "description": "Websocket sample with Istio",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gnanasekaran@google.com",
+  "dependencies": {
+    "ws": "^6.1.2"
+  },
+  "license": "Apache-2.0"
+}
