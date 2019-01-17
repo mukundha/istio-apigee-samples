@@ -1,3 +1,10 @@
+#certs
+*.pem
+*.crt
+*.key
+*.cer
+certs/
+
 # Logs
 logs
 *.log

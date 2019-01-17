@@ -1,0 +1,55 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: tls-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+    hosts:
+    - "*"    
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: samples-api
+spec:
+  gateways:
+  - tls-gateway
+  hosts:
+    - "*"    
+  http:
+  - match:
+    - uri: 
+        prefix: "/ws"
+    route:
+    - destination:
+        host: ws-echo
+        port:
+          number: 80
+    websocketUpgrade: true    
+  - match:
+    - uri: 
+        prefix: "/helloworld.Greeter/"    
+    route:
+    - destination:
+        host: grpc-greeter
+        port:
+          number: 80       
+  - match:
+    - uri: 
+        prefix: "/"
+    route:
+    - destination:
+        host: http2-hello
+        port:
+          number: 80       

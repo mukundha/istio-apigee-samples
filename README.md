@@ -55,7 +55,7 @@ wscat -c localhost:8080/ws
 
 ```
 kubectl apply -f deploy-manifests
-kubectl apply -f istio-manifests
+kubectl apply -f istio-manifests/api-gateway.yaml
 ```
 
 Verify
@@ -100,3 +100,33 @@ node client.js
 ```
 
 You will notice all calls with valid keys return successful responses. After a few minutes you can observer analytics data showing up for these servcies in Apigee.
+
+## Setup TLS at Ingress
+
+Generate a self-signed certificate
+```
+openssl req -x509 -out localhost.crt -keyout localhost.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+   
+```
+
+Install the certs in your k8s cluster
+
+```
+kubectl create -n istio-system secret tls istio-ingressgateway-certs --key localhost.key --cert localhost.crt
+
+export TLS_GATEWAY_URL=https://$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+curl $TLS_GATEWAY_URL -k -H 'x-api-key: <api-key>'
+
+wscat -c $TLS_GATEWAY_URL/ws -H 'x-api-key: <api-key>' -n
+
+```
+for grpc, there is some problem in `nodejs` client for self-signed certs, try the `go` client
+
+```
+cd grpc
+go run client.go
+```
