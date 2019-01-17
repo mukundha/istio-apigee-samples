@@ -118,13 +118,20 @@ Install the certs in your k8s cluster
 kubectl create -n istio-system secret tls istio-ingressgateway-certs --key localhost.key --cert localhost.crt
 
 export TLS_GATEWAY_URL=https://$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
 
-curl $TLS_GATEWAY_URL -k -H 'x-api-key: <api-key>'
+`http2` use `-k` to ignore the cert warnings (since we are using self-signed certs)
+```
+curl --http2 $TLS_GATEWAY_URL -k -H 'x-api-key: <api-key>'
+```
 
+`websocket` use `-n` to ignore cert errors
+```
 wscat -c $TLS_GATEWAY_URL/ws -H 'x-api-key: <api-key>' -n
 
 ```
-for grpc, there is some problem in `nodejs` client for self-signed certs, try the `go` client
+
+`grpc`, there is some problem in `nodejs` client for self-signed certs, try the `go` client instead. Configure the cert location and IP address in the code
 
 ```
 cd grpc
